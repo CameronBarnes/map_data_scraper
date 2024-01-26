@@ -2,6 +2,8 @@ use std::process::Command;
 
 use once_cell::sync::Lazy;
 
+use crate::parsing::parse_open_street_map;
+
 mod types;
 mod parsing;
 
@@ -20,5 +22,5 @@ pub fn check_for_rsync() -> bool {
 }
 
 fn main() {
-    println!("Hello, world!");
+    println!("{}", serde_json::to_string(&parse_open_street_map()).unwrap());
 }

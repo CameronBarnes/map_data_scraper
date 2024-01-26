@@ -1,5 +1,3 @@
-use std::cmp::Reverse;
-
 use serde::Serialize;
 
 #[derive(Debug, Serialize)]
@@ -34,29 +32,6 @@ impl LibraryItem {
         match self {
             Self::Document(doc) => doc.can_download(),
             Self::Category(cat) => cat.can_download(),
-        }
-    }
-
-    pub fn size(&self, enabled_only: bool) -> u64 {
-        match self {
-            Self::Document(doc) => {
-                if enabled_only {
-                    if doc.enabled {
-                        doc.size
-                    } else {
-                        0
-                    }
-                } else {
-                    doc.size
-                }
-            }
-            Self::Category(cat) => {
-                if enabled_only {
-                    cat.size(true)
-                } else {
-                    cat.size(false)
-                }
-            }
         }
     }
 }
@@ -128,7 +103,10 @@ impl Category {
         self.items.iter().any(LibraryItem::can_download)
     }
 
-    pub fn add(&mut self, item: LibraryItem) {
+    pub fn add(&mut self, mut item: LibraryItem) {
+        if self.single_selection && !self.items.is_empty() {
+            item.set_enabled(false);
+        }
         match item {
             LibraryItem::Document(_) => self.items.push(item),
             LibraryItem::Category(category) => {
@@ -154,9 +132,5 @@ impl Category {
                 }
             }
         }
-    }
-
-    pub fn size(&self, enabled_only: bool) -> u64 {
-        self.items.iter().map(|item| item.size(enabled_only)).sum()
     }
 }
