@@ -109,13 +109,6 @@ pub struct Category {
 
 impl Category {
     pub fn new(name: String, mut items: Vec<LibraryItem>, single_selection: bool) -> Self {
-        items.sort_unstable_by_key(|item| {
-            let size = match item {
-                LibraryItem::Document(doc) => doc.size,
-                LibraryItem::Category(cat) => cat.size(true),
-            };
-            Reverse(size)
-        });
         if single_selection {
             // Only one option can be enabled at a time with single selection
             (1..items.len()).for_each(|i| {
