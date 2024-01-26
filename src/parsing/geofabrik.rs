@@ -1,16 +1,7 @@
 use once_cell::sync::Lazy;
 use regex::Regex;
-use reqwest::blocking::Client;
 
-use crate::types::{Category, Document, DownloadType, LibraryItem};
-
-pub fn parse_open_street_map() -> LibraryItem {
-    LibraryItem::Category(Category::new(
-        String::from("Open Street Map"),
-        vec![parse_geofabrik()],
-        false,
-    ))
-}
+use crate::{types::{LibraryItem, Category, Document, DownloadType}, parsing::get_page_from_path};
 
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 fn parse_geofabrik_size(size: &str) -> u64 {
@@ -26,7 +17,7 @@ fn parse_geofabrik_size(size: &str) -> u64 {
     size as u64
 }
 
-fn parse_geofabrik() -> LibraryItem {
+pub fn parse() -> LibraryItem {
     static MAIN_PATH: &str = "https://download.geofabrik.de";
 
     let mut category = Category::new(String::from("Map Data"), vec![], false);
@@ -106,14 +97,4 @@ fn parse_geofabrik_page(page: &str) -> Vec<(&str, &str, &str, &str)> {
         .map(|e| e.extract())
         .map(|(_, arr)| arr.into())
         .collect()
-}
-
-pub fn get_page_from_path(path: &str) -> String {
-    static CLIENT: Lazy<Client> = Lazy::new(|| {
-        reqwest::blocking::ClientBuilder::new()
-            .user_agent("Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/117.0")
-            .build()
-            .unwrap()
-    });
-    CLIENT.get(path).send().unwrap().text().unwrap()
 }
